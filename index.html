@@ -2,7 +2,7 @@
 <html lang="bg">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#090d1c">
   <meta name="description" content="PartyBeats — предложи песен, гласувай и създай плейлиста за коледното парти заедно с колегите си.">
   <title>PartyBeats — Твоят глас. Нашият ритъм.</title>
@@ -10,9 +10,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./mobile.css">
   <script defer src="./app.js"></script>
 </head>
 <body>
+  <a class="skip-link" href="#playlist">Към плейлиста</a>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-defs" aria-hidden="true">
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7V5Z" stroke-linejoin="round"/></symbol>
@@ -103,9 +105,21 @@
     <footer class="footer"><div><a class="footer-brand" href="#top">party<span>beats</span>.</a><p>Made for good music &amp; better parties. <span>✳</span> 2026</p></div><div class="footer-actions"><button class="footer-link" id="reset-button" type="button"><svg class="icon"><use href="#i-refresh"></use></svg> Нулирай демото</button><span class="footer-separator">·</span><a class="footer-link" href="https://github.com/plamensve/partybeats" target="_blank" rel="noopener noreferrer">GitHub <svg class="icon"><use href="#i-external"></use></svg></a></div></footer>
   </div>
 
+  <nav class="mobile-nav" aria-label="Бърза мобилна навигация">
+    <a class="mobile-nav-link" href="#top" data-nav="home" aria-label="Към началото">
+      <svg class="icon" aria-hidden="true"><use href="#i-music"></use></svg><span>Начало</span>
+    </a>
+    <a class="mobile-nav-link mobile-nav-link-active" href="#playlist" data-nav="playlist" aria-label="Към песните">
+      <svg class="icon" aria-hidden="true"><use href="#i-headphones"></use></svg><span>Песни</span>
+    </a>
+    <button class="mobile-nav-add" data-open-add type="button" aria-label="Добави нова песен">
+      <span class="mobile-nav-add-icon"><svg class="icon" aria-hidden="true"><use href="#i-plus"></use></svg></span><span>Добави</span>
+    </button>
+  </nav>
+
   <div class="modal" id="add-modal" role="dialog" aria-modal="true" aria-labelledby="add-modal-title" aria-hidden="true">
     <div class="modal-panel add-panel"><div class="modal-head"><div><span class="modal-kicker">YOUR TRACK. YOUR VIBE.</span><h2 id="add-modal-title">Предложи <em>песен.</em></h2><p>Дай шанс на любимия си хит да влезе в плейлиста.</p></div><button type="button" class="modal-close" data-close aria-label="Затвори"><svg class="icon"><use href="#i-close"></use></svg></button></div>
-      <form id="add-form"><label class="field"><span>YouTube линк <b>*</b></span><span class="input-with-icon"><svg class="icon"><use href="#i-link"></use></svg><input id="youtube-url" type="url" placeholder="https://www.youtube.com/watch?v=..." required></span></label><div id="video-preview" class="video-preview" hidden><img id="preview-image" alt="Миниатюра на видеото"><span><strong>Видеото е разпознато!</strong><small>Ще използваме миниатюрата от YouTube.</small></span><svg class="icon"><use href="#i-check"></use></svg></div><label class="field"><span>Име на песента <b>*</b></span><input id="song-title" type="text" maxlength="100" placeholder="Например: Last Christmas" required></label><label class="field"><span>Изпълнител</span><input id="song-artist" type="text" maxlength="70" placeholder="Например: Wham!"></label><div class="form-two"><label class="field"><span>Категория</span><select id="song-category"><option value="party">⚡ Парти хит</option><option value="christmas">🎄 Коледна песен</option></select></label><label class="field"><span>Твоето име (по желание)</span><input id="song-author" type="text" maxlength="35" placeholder="Например: Пламен"></label></div><p class="form-error" id="form-error" role="alert" hidden></p><button class="button button-primary button-submit" type="submit"><svg class="icon"><use href="#i-plus"></use></svg> Добави в плейлиста</button></form>
+      <form id="add-form"><label class="field"><span>YouTube линк <b>*</b></span><span class="input-with-icon"><svg class="icon"><use href="#i-link"></use></svg><input id="youtube-url" inputmode="url" enterkeyhint="next" autocapitalize="off" autocorrect="off" spellcheck="false" type="url" placeholder="https://www.youtube.com/watch?v=..." required></span></label><div id="video-preview" class="video-preview" hidden><img id="preview-image" alt="Миниатюра на видеото"><span><strong>Видеото е разпознато!</strong><small>Ще използваме миниатюрата от YouTube.</small></span><svg class="icon"><use href="#i-check"></use></svg></div><label class="field"><span>Име на песента <b>*</b></span><input id="song-title" autocomplete="off" enterkeyhint="next" type="text" maxlength="100" placeholder="Например: Last Christmas" required></label><label class="field"><span>Изпълнител</span><input id="song-artist" autocomplete="off" enterkeyhint="next" type="text" maxlength="70" placeholder="Например: Wham!"></label><div class="form-two"><label class="field"><span>Категория</span><select id="song-category"><option value="party">⚡ Парти хит</option><option value="christmas">🎄 Коледна песен</option></select></label><label class="field"><span>Твоето име (по желание)</span><input id="song-author" autocomplete="nickname" enterkeyhint="done" type="text" maxlength="35" placeholder="Например: Пламен"></label></div><p class="form-error" id="form-error" role="alert" hidden></p><button class="button button-primary button-submit" type="submit"><svg class="icon"><use href="#i-plus"></use></svg> Добави в плейлиста</button></form>
     </div>
   </div>
 

@@ -18,6 +18,7 @@
   const state = { addedSongs:[], votes:{}, displayName:"", filter:"all", sort:"popular", search:"" };
   let activeSong = null;
   let toastTimeout = null;
+  let modalTrigger = null;
 
   function parseYouTubeId(raw) {
     try {
@@ -102,6 +103,9 @@
     img.src = thumb(song);
     img.alt = "";
     img.loading = "lazy";
+    img.decoding = "async";
+    img.width = 120;
+    img.height = 90;
     const coverPlay = el("span","cover-play");
     coverPlay.appendChild(svg("play"));
     cover.append(img, coverPlay);
@@ -180,18 +184,26 @@
   }
   function openModal(id) {
     const modal = $("#" + id);
+    if (!modal) return;
+    modalTrigger = document.activeElement;
     modal.classList.add("is-open");
-    modal.setAttribute("aria-hidden","false");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
     document.body.style.overflow = "hidden";
     const focusTarget = modal.querySelector("input,button");
-    if (focusTarget) focusTarget.focus();
+    if (focusTarget) focusTarget.focus({preventScroll:true});
   }
   function closeModal(modal) {
-    if (!modal) return;
+    if (!modal || !modal.classList.contains("is-open")) return;
     modal.classList.remove("is-open");
     modal.setAttribute("aria-hidden","true");
     if (modal.id === "player-modal") $("#youtube-player").src = "about:blank";
-    if (!document.querySelector(".modal.is-open")) document.body.style.overflow = "";
+    if (!document.querySelector(".modal.is-open")) {
+      document.body.style.overflow = "";
+      document.body.classList.remove("modal-open");
+      if (modalTrigger && modalTrigger.isConnected) modalTrigger.focus({preventScroll:true});
+      modalTrigger = null;
+    }
   }
   function openAdd() {
     $("#add-form").reset();
@@ -255,11 +267,20 @@
     toast("Експортът е готов! 🎶");
   }
   async function share() {
+    const url = window.location.href.split("#")[0];
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share({title:"PartyBeats",text:"Предложи песен и гласувай за парти плейлиста!",url});
+        return;
+      } catch (error) {
+        if (error && error.name === "AbortError") return;
+      }
+    }
     try {
-      await navigator.clipboard.writeText(window.location.href.split("#")[0]);
+      await navigator.clipboard.writeText(url);
       toast("Линкът към сайта е копиран!");
     } catch (_) {
-      window.prompt("Копирай линка към сайта:",window.location.href.split("#")[0]);
+      window.prompt("Копирай линка към сайта:",url);
     }
   }
   function resetDemo() {
@@ -290,7 +311,22 @@
     $("#export-button").addEventListener("click",exportCsv);
     $("#reset-button").addEventListener("click",resetDemo);
     $$(".modal").forEach((modal) => modal.addEventListener("click",(event) => { if (event.target === modal || event.target.closest("[data-close]")) closeModal(modal); }));
-    document.addEventListener("keydown",(event) => { if (event.key === "Escape") $$(".modal.is-open").forEach(closeModal); });
+    document.addEventListener("keydown",(event) => {
+      const modal = $(".modal.is-open");
+      if (!modal) return;
+      if (event.key === "Escape") {
+        closeModal(modal);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = Array.from(modal.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )).filter((element) => element.getClientRects().length && !element.closest("[hidden]"));
+      if (!focusable.length) return;
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    });
     render();
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded",init);
