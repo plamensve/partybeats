@@ -10,20 +10,34 @@
   color:#f7f6ff;
 }
 .pb-player button,.pb-player a,.pb-player input{pointer-events:auto}
+/* One unified player surface: expanded video and transport bar share an
+   outer frame, radius, gradient and shadow without overlapping borders. */
+.pb-player-frame{
+  display:flex;
+  flex-direction:column;
+  pointer-events:auto;
+  align-self:center;
+  width:min(1080px,100%);
+  min-width:0;
+  overflow:hidden;
+  border:1px solid #545c98;
+  border-radius:20px;
+  background:
+    radial-gradient(ellipse at 14% 0%,rgba(110,91,211,.13),transparent 65%),
+    linear-gradient(112deg,rgba(26,25,57,.98),rgba(18,26,52,.98));
+  box-shadow:0 16px 64px #020412ed,0 0 40px #5a59e71c;
+  backdrop-filter:blur(22px);
+  -webkit-backdrop-filter:blur(22px);
+}
 .pb-player-expanded{
   pointer-events:auto;
-  /* Center the YouTube panel over the persistent music-player bar. */
-  align-self:center;
-  width:min(740px,calc(100vw - 32px));
-  margin-inline:auto;
-  margin-bottom:10px;
-  padding:15px;
-  border:1px solid #6665af;
-  border-radius:18px;
-  background:linear-gradient(145deg,#17162f,#111a36 75%);
-  box-shadow:0 22px 80px #020414ee,0 0 44px #4f52e02a;
-  max-height:calc(100vh - 140px);
-  max-height:calc(100dvh - 140px);
+  flex:none;
+  width:100%;
+  min-width:0;
+  padding:18px 21px 17px;
+  background:transparent;
+  max-height:calc(100vh - 134px);
+  max-height:calc(100dvh - 134px);
   overflow-y:auto;
   overscroll-behavior:contain;
 }
@@ -54,16 +68,24 @@
 .pb-waveform span{width:3px;flex:none;background:linear-gradient(#a38cff,#84ccff);border-radius:3px;opacity:.76}
 .pb-player-bar{
   pointer-events:auto;
-  width:min(1350px,100%);
-  align-self:center;
+  position:relative;
+  width:100%;
+  min-width:0;
   min-height:91px;
   display:grid;grid-template-columns:62px minmax(145px,240px) 148px minmax(130px,1fr) 86px;
   gap:15px;align-items:center;
   padding:11px 17px;
-  border:1px solid #4c518a;border-radius:17px;
-  background:linear-gradient(110deg,rgba(28,26,60,.97),rgba(19,26,54,.97));
-  box-shadow:0 10px 47px #030615e6,0 0 45px #7465de19;
-  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)
+  background:transparent;
+}
+.pb-player:not(.is-collapsed) .pb-player-bar::before{
+  content:"";
+  position:absolute;
+  left:17px;right:17px;top:0;height:1px;
+  background:linear-gradient(90deg,transparent,#7a80c37d 12%,#8795db80 80%,transparent);
+  pointer-events:none;
+}
+.pb-player.is-collapsed .pb-player-frame{
+  border-radius:17px;
 }
 .pb-artwork-toggle{border:0;border-radius:10px;background:#2c2b54;overflow:hidden;padding:0;width:62px;height:62px}
 .pb-artwork-toggle img{width:100%;height:100%;object-fit:cover;display:block}
@@ -104,7 +126,7 @@
 #pb-progress:disabled{cursor:default;opacity:.6}
 .pb-end-actions{display:flex;align-items:center;justify-content:flex-end;gap:3px}
 .pb-collapse{width:40px;height:40px}
-.pb-player.is-collapsed .pb-player-bar{border-color:#525988}
+.pb-player.is-collapsed .pb-player-frame{border-color:#525988}
 .pb-player.is-collapsed .pb-playing-label .pb-live-dot{background:#999cbd}
 @media(max-width:940px){
   .pb-player-bar{grid-template-columns:56px minmax(110px,1fr) 140px 110px;gap:10px;padding:9px 12px}
@@ -121,9 +143,17 @@
     padding:0;
     z-index:64;
   }
+  .pb-player-frame{
+    width:100%;
+    border-left:0;
+    border-right:0;
+    border-bottom:0;
+    border-radius:16px 16px 0 0;
+    background:linear-gradient(130deg,rgba(28,27,62,.98),rgba(17,25,53,.98));
+    box-shadow:0 -13px 43px #020411bd;
+  }
+  .pb-player.is-collapsed .pb-player-frame{border-radius:16px 16px 0 0}
   .pb-player-bar{
-    border-radius:14px 14px 0 0;
-    border-left:0;border-right:0;border-bottom:0;
     min-height:74px;width:100%;
     display:grid;grid-template-columns:48px minmax(0,1fr) 125px 40px;
     gap:9px;
@@ -150,13 +180,13 @@
   #pb-progress{height:18px}
   .pb-clock{font-size:9px}
   .pb-player-expanded{
-    align-self:stretch;
     width:100%;
-    border-radius:17px 17px 0 0;
-    margin-bottom:0;
     padding:12px max(14px,env(safe-area-inset-right,0px)) 12px max(14px,env(safe-area-inset-left,0px));
     max-height:calc(100dvh - 177px - env(safe-area-inset-bottom,0px));
     overflow-y:auto;
+  }
+  .pb-player:not(.is-collapsed) .pb-player-bar::before{
+    left:14px;right:14px;
   }
   .pb-close-mobile{display:grid!important}
   .pb-expanded-heading{margin-bottom:9px}
