@@ -112,9 +112,7 @@
             onReady:() => {
               state.ready=true;state.loading=false;
               const current=state.song;
-              if (current && current.youtubeId !== state.lastId) {
-                playerCall("loadVideoById",current.youtubeId);
-              } else if (current) playerCall("playVideo");
+              if (current && !root.hidden) playerCall("loadVideoById",current.youtubeId);
               state.lastId=current ? current.youtubeId : null;
               report("Управлявай музиката тук или директно във видеото.");
               beginTicker();
@@ -237,7 +235,7 @@
       playerCall("pauseVideo");
       state.playing=false;
       renderPlayState();
-      report("На пауза, докато прозорецът е отворен.");
+      report("Възпроизвеждането е паузирано.");
     }
   }
   function close() {
@@ -250,10 +248,11 @@
     state.queue=[];state.index=0;state.playing=false;
     state.loading=false;state.lastId=null;
     if(ticker){clearInterval(ticker);ticker=null;}
-    const frame=$("pb-youtube-host");
-    if(!frame) {
-      const container=document.querySelector(".pb-yt-container");
-      if(container)container.replaceChildren(Object.assign(document.createElement("div"),{id:"pb-youtube-host"}));
+    const container=document.querySelector(".pb-yt-container");
+    if(container) {
+      const newHost=document.createElement("div");
+      newHost.id="pb-youtube-host";
+      container.replaceChildren(newHost);
     }
     root.hidden=true;
     pane.hidden=false;
@@ -276,6 +275,7 @@
   $("pb-expand").addEventListener("click",()=>setExpanded(!state.expanded));
   $("pb-collapse").addEventListener("click",()=>setExpanded(false));
   $("pb-close").addEventListener("click",close);
+  $("pb-close-mobile").addEventListener("click",close);
   progress.addEventListener("change",seek);
   progress.addEventListener("input",()=>{
     progress.style.setProperty("--percent",progress.value+"%");
