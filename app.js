@@ -95,6 +95,7 @@
 
   function renderSong(song, position) {
     const row = el("article","song-row");
+    row.dataset.songId = song.id;
     const rank = el("span","song-rank" + (position < 3 ? " top-rank" : ""), String(position + 1).padStart(2,"0"));
     const cover = el("button","song-cover");
     cover.type = "button";
@@ -120,12 +121,14 @@
     const data = voteData(song);
     const up = el("button","vote-button" + (data.vote === 1 ? " is-liked" : ""));
     up.type = "button";
+    up.dataset.voteDirection = "up";
     up.setAttribute("aria-label","Харесвам " + song.title);
     up.setAttribute("aria-pressed", String(data.vote === 1));
     up.append(svg("thumbs-up"), el("span","",String(data.up)));
     up.addEventListener("click", () => vote(song.id,1));
     const down = el("button","vote-button dislike" + (data.vote === -1 ? " is-disliked" : ""));
     down.type = "button";
+    down.dataset.voteDirection = "down";
     down.setAttribute("aria-label","Не харесвам " + song.title);
     down.setAttribute("aria-pressed", String(data.vote === -1));
     down.append(svg("thumbs-down"), el("span","",String(data.down)));
@@ -139,7 +142,8 @@
   function render() {
     const all = songs();
     const ranked = sortedSongs();
-    $("#song-list").replaceChildren();
+    const list = $("#song-list");
+    const fragment = document.createDocumentFragment();
     if (!ranked.length) {
       const blank = el("div","empty-state");
       blank.append(el("span","empty-emoji","🎶"),el("h3","", "Тук е тихичко..."),el("p","", "Няма песни, които да отговарят на избрания филтър."));
@@ -147,8 +151,10 @@
       add.type = "button";
       add.addEventListener("click",openAdd);
       blank.appendChild(add);
-      $("#song-list").appendChild(blank);
-    } else ranked.forEach((song,index) => $("#song-list").appendChild(renderSong(song,index)));
+      fragment.appendChild(blank);
+    } else ranked.forEach((song,index) => fragment.appendChild(renderSong(song,index)));
+    list.replaceChildren(fragment);
+    $("#song-results-status").textContent = `${ranked.length} песни от общо ${all.length}.`;
     $("#all-count").textContent = String(all.length);
     $("#stat-songs").textContent = String(all.length).padStart(2,"0");
     $("#stat-votes").textContent = String(all.reduce((sum,song) => { const v = voteData(song); return sum + v.up + v.down; },0));
@@ -169,10 +175,17 @@
     }
   }
   function vote(id,value) {
+    const keyboardFocus = document.activeElement && document.activeElement.matches(":focus-visible");
     state.votes[id] = state.votes[id] === value ? 0 : value;
     if (!state.votes[id]) delete state.votes[id];
     saveState();
     render();
+    if (keyboardFocus) {
+      const row = Array.from(document.querySelectorAll(".song-row")).find(element => element.dataset.songId === id);
+      const direction = value === 1 ? "up" : "down";
+      const control = row && row.querySelector('[data-vote-direction="' + direction + '"]');
+      if (control) control.focus({preventScroll:true});
+    }
     toast(value === 1 ? "Гласът ти е отчетен в този браузър! 👍" : "Гласът ти е отчетен в този браузър! 👎");
   }
   function toast(message) {
@@ -212,7 +225,8 @@
     $("#form-error").hidden = true;
     $("#video-preview").hidden = true;
     openModal("add-modal");
-    $("#youtube-url").focus();
+    // Touch users can open the keyboard when ready.
+    if (!window.matchMedia("(max-width:767px) and (pointer:coarse)").matches) $("#youtube-url").focus({preventScroll:true});
   }
   function playSong(song) {
     if (window.PartyBeatsPlayer) {
@@ -300,6 +314,17 @@
     render();
     toast("Демото е нулирано.");
   }
+  function syncMobileNavigation() {
+    const section = $("#playlist");
+    if (!section) return;
+    const atPlaylist = section.getBoundingClientRect().top <= 128;
+    $(".mobile-nav-link").forEach(link => {
+      const active = link.dataset.nav === (atPlaylist ? "playlist" : "home");
+      link.classList.toggle("mobile-nav-link-active",active);
+      if (active) link.setAttribute("aria-current","page");
+      else link.removeAttribute("aria-current");
+    });
+  }
   function init() {
     loadState();
     $$("[data-open-add]").forEach((button) => button.addEventListener("click", openAdd));
@@ -307,12 +332,27 @@
     $("#featured-play").addEventListener("click", () => { if (activeSong) playSong(activeSong); });
     $("#add-form").addEventListener("submit", handleAdd);
     $("#youtube-url").addEventListener("input",previewUrl);
-    $("#song-search").addEventListener("input",(e) => { state.search = e.target.value.toLocaleLowerCase("bg-BG").trim(); render(); });
+    let searchTimer = null;
+    $("#song-search").addEventListener("input",(e) => {
+      state.search = e.target.value.toLocaleLowerCase("bg-BG").trim();
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(render,100);
+    });
     $("#song-sort").addEventListener("change",(e) => { state.sort = e.target.value; render(); });
     $$(".filter-tab").forEach((button) => button.addEventListener("click", () => { state.filter = button.dataset.filter; render(); }));
     $("#share-button").addEventListener("click",share);
     $("#export-button").addEventListener("click",exportCsv);
     $("#reset-button").addEventListener("click",resetDemo);
+    let scrollPending = false;
+    window.addEventListener("scroll",() => {
+      if (scrollPending) return;
+      scrollPending = true;
+      requestAnimationFrame(() => { scrollPending = false; syncMobileNavigation(); });
+    },{passive:true});
+    window.addEventListener("resize",syncMobileNavigation,{passive:true});
+    $(".mobile-nav-link").forEach(link =>
+      link.addEventListener("click",() => requestAnimationFrame(syncMobileNavigation))
+    );
     $$(".modal").forEach((modal) => modal.addEventListener("click",(event) => { if (event.target === modal || event.target.closest("[data-close]")) closeModal(modal); }));
     document.addEventListener("keydown",(event) => {
       const modal = $(".modal.is-open");
@@ -331,6 +371,7 @@
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     });
     render();
+    syncMobileNavigation();
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded",init);
   else init();

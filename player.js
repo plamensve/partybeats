@@ -69,8 +69,11 @@
       report("На пауза. Разгъни плейъра, за да продължиш.");
     }
     state.expanded=expanded;
+    document.body.classList.toggle("player-expanded",expanded && !root.hidden);
     pane.hidden=!expanded;
     $("pb-expand").setAttribute("aria-expanded",String(expanded));
+    $("pb-artwork-toggle").setAttribute("aria-expanded",String(expanded));
+    $("pb-artwork-toggle").setAttribute("aria-label",expanded ? "Свий плейъра" : "Разгъни плейъра");
     $("pb-expand").setAttribute("aria-label", expanded ? "Свий плейъра" : "Разгъни плейъра");
     expandUse.setAttribute("href", expanded ? "#i-chevron-down" : "#i-chevron-up");
     root.classList.toggle("is-collapsed",!expanded);
@@ -155,7 +158,7 @@
     ticker=setInterval(() => {
       if (!state.song || !state.ready || document.visibilityState==="hidden") return;
       updateTime();
-    },450);
+    },850);
   }
   function updateTime() {
     if(!state.ready || !state.song)return;
@@ -201,6 +204,7 @@
     state.index=index;
     state.playing=false;
     root.hidden=false;
+    document.body.classList.add("has-player");
     renderTrack();
     setExpanded(true);
     report("Зареждане на YouTube плейъра…");
@@ -255,6 +259,7 @@
       container.replaceChildren(newHost);
     }
     root.hidden=true;
+    document.body.classList.remove("has-player","player-expanded");
     pane.hidden=false;
     renderPlayState();
   }
