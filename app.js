@@ -1,0 +1,298 @@
+/* PartyBeats v1 — client-only prototype.
+   The storage layer is intentionally isolated so Supabase/auth can replace it later. */
+(function () {
+  "use strict";
+
+  const STORAGE_KEY = "partybeats_demo_v1";
+  const DEFAULT_SONGS = [
+    { id:"yXQViqx6GMY", youtubeId:"yXQViqx6GMY", title:"All I Want for Christmas Is You", artist:"Mariah Carey", category:"christmas", author:"Екип PartyBeats", addedAt:"2026-10-11T10:00:00Z", likes:27, dislikes:3 },
+    { id:"E8gmARGvPlI", youtubeId:"E8gmARGvPlI", title:"Last Christmas", artist:"Wham!", category:"christmas", author:"Екип PartyBeats", addedAt:"2026-10-12T10:00:00Z", likes:23, dislikes:4 },
+    { id:"5NV6Rdv1a3I", youtubeId:"5NV6Rdv1a3I", title:"Get Lucky", artist:"Daft Punk ft. Pharrell Williams", category:"party", author:"Екип PartyBeats", addedAt:"2026-10-12T12:00:00Z", likes:22, dislikes:4 },
+    { id:"4NRXx6U8ABQ", youtubeId:"4NRXx6U8ABQ", title:"Blinding Lights", artist:"The Weeknd", category:"party", author:"Екип PartyBeats", addedAt:"2026-10-13T08:00:00Z", likes:20, dislikes:3 },
+    { id:"xFrGuyw1V8s", youtubeId:"xFrGuyw1V8s", title:"Dancing Queen", artist:"ABBA", category:"party", author:"Екип PartyBeats", addedAt:"2026-10-13T10:00:00Z", likes:16, dislikes:2 },
+    { id:"1qYz7rfgLWE", youtubeId:"1qYz7rfgLWE", title:"Rockin' Around the Christmas Tree", artist:"Brenda Lee", category:"christmas", author:"Екип PartyBeats", addedAt:"2026-10-14T08:00:00Z", likes:14, dislikes:2 },
+    { id:"TUVcZfQe-Kw", youtubeId:"TUVcZfQe-Kw", title:"Levitating", artist:"Dua Lipa", category:"party", author:"Екип PartyBeats", addedAt:"2026-10-14T12:00:00Z", likes:12, dislikes:2 }
+  ];
+  const $ = (selector) => document.querySelector(selector);
+  const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+  const state = { addedSongs:[], votes:{}, displayName:"", filter:"all", sort:"popular", search:"" };
+  let activeSong = null;
+  let toastTimeout = null;
+
+  function parseYouTubeId(raw) {
+    try {
+      const url = new URL(String(raw).trim());
+      const host = url.hostname.toLowerCase().replace(/^www\./, "");
+      if (url.protocol !== "https:" && url.protocol !== "http:") return null;
+      let id = null;
+      if (host === "youtu.be") id = url.pathname.split("/")[1];
+      else if (["youtube.com", "m.youtube.com", "music.youtube.com", "youtube-nocookie.com"].includes(host)) {
+        const segments = url.pathname.split("/").filter(Boolean);
+        if (url.pathname === "/watch") id = url.searchParams.get("v");
+        else if (["shorts", "embed", "live", "v"].includes(segments[0])) id = segments[1];
+      }
+      return /^[a-zA-Z0-9_-]{11}$/.test(id || "") ? id : null;
+    } catch (_) { return null; }
+  }
+
+  function loadState() {
+    try {
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      if (Array.isArray(stored.addedSongs)) {
+        state.addedSongs = stored.addedSongs.filter((s) => s && typeof s.youtubeId === "string" && /^[\w-]{11}$/.test(s.youtubeId) && typeof s.title === "string" && typeof s.id === "string").slice(0, 500);
+      }
+      if (stored.votes && typeof stored.votes === "object" && !Array.isArray(stored.votes)) {
+        Object.keys(stored.votes).forEach((id) => { if ([1, -1].includes(stored.votes[id])) state.votes[id] = stored.votes[id]; });
+      }
+      if (typeof stored.displayName === "string") state.displayName = stored.displayName.slice(0, 35);
+    } catch (_) { /* Browser storage may be disabled. The demo still works in memory. */ }
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ addedSongs:state.addedSongs, votes:state.votes, displayName:state.displayName }));
+    } catch (_) { toast("Браузърът не позволява локално запазване."); }
+  }
+
+  function songs() { return DEFAULT_SONGS.concat(state.addedSongs); }
+  function voteData(song) {
+    const vote = state.votes[song.id] || 0;
+    const up = (Number(song.likes) || 0) + (vote === 1 ? 1 : 0);
+    const down = (Number(song.dislikes) || 0) + (vote === -1 ? 1 : 0);
+    return { up, down, score:up - down, vote };
+  }
+  function sortedSongs() {
+    const items = songs().filter((s) => {
+      if (state.filter === "voted" && !state.votes[s.id]) return false;
+      if (state.filter !== "all" && state.filter !== "voted" && s.category !== state.filter) return false;
+      const text = (s.title + " " + s.artist + " " + s.author).toLocaleLowerCase("bg-BG");
+      return text.includes(state.search);
+    });
+    items.sort((a,b) => {
+      if (state.sort === "az") return a.title.localeCompare(b.title, "bg-BG");
+      if (state.sort === "recent") return new Date(b.addedAt) - new Date(a.addedAt);
+      return voteData(b).score - voteData(a).score || new Date(b.addedAt) - new Date(a.addedAt);
+    });
+    return items;
+  }
+  function el(tag, className, text) {
+    const result = document.createElement(tag);
+    if (className) result.className = className;
+    if (text !== undefined) result.textContent = text;
+    return result;
+  }
+  function svg(id) {
+    const svgEl = document.createElementNS("http://www.w3.org/2000/svg","svg");
+    svgEl.setAttribute("class", "icon");
+    const use = document.createElementNS("http://www.w3.org/2000/svg","use");
+    use.setAttribute("href", "#i-" + id);
+    svgEl.appendChild(use);
+    return svgEl;
+  }
+  function genreLabel(song) { return song.category === "christmas" ? "🎄 Коледна" : "⚡ Парти хит"; }
+  function thumb(song) { return "https://i.ytimg.com/vi/" + song.youtubeId + "/hqdefault.jpg"; }
+
+  function renderSong(song, position) {
+    const row = el("article","song-row");
+    const rank = el("span","song-rank" + (position < 3 ? " top-rank" : ""), String(position + 1).padStart(2,"0"));
+    const cover = el("button","song-cover");
+    cover.type = "button";
+    cover.setAttribute("aria-label", "Пусни " + song.title);
+    const img = el("img");
+    img.src = thumb(song);
+    img.alt = "";
+    img.loading = "lazy";
+    const coverPlay = el("span","cover-play");
+    coverPlay.appendChild(svg("play"));
+    cover.append(img, coverPlay);
+    cover.addEventListener("click", () => playSong(song));
+    const info = el("div","song-info");
+    info.appendChild(el("h3","",song.title));
+    info.appendChild(el("p","song-artist",song.artist || "Неизвестен изпълнител"));
+    const meta = el("div","song-meta");
+    meta.append(el("span","song-genre",genreLabel(song)), el("span","song-meta-dot"), el("span","", "от " + (song.author || "Анонимен")));
+    info.appendChild(meta);
+    const voting = el("div","vote-group");
+    const data = voteData(song);
+    const up = el("button","vote-button" + (data.vote === 1 ? " is-liked" : ""));
+    up.type = "button";
+    up.setAttribute("aria-label","Харесвам " + song.title);
+    up.setAttribute("aria-pressed", String(data.vote === 1));
+    up.append(svg("thumbs-up"), el("span","",String(data.up)));
+    up.addEventListener("click", () => vote(song.id,1));
+    const down = el("button","vote-button dislike" + (data.vote === -1 ? " is-disliked" : ""));
+    down.type = "button";
+    down.setAttribute("aria-label","Не харесвам " + song.title);
+    down.setAttribute("aria-pressed", String(data.vote === -1));
+    down.append(svg("thumbs-down"), el("span","",String(data.down)));
+    down.addEventListener("click", () => vote(song.id,-1));
+    const score = el("span","score-box" + (data.score < 0 ? " negative" : data.score === 0 ? " neutral" : ""), (data.score > 0 ? "+" : "") + data.score);
+    score.title = "Резултат = харесвания − нехаресвания";
+    voting.append(up, down, score);
+    row.append(rank, cover, info, voting);
+    return row;
+  }
+  function render() {
+    const all = songs();
+    const ranked = sortedSongs();
+    $("#song-list").replaceChildren();
+    if (!ranked.length) {
+      const blank = el("div","empty-state");
+      blank.append(el("span","empty-emoji","🎶"),el("h3","", "Тук е тихичко..."),el("p","", "Няма песни, които да отговарят на избрания филтър."));
+      const add = el("button","button button-primary","Добави песен");
+      add.type = "button";
+      add.addEventListener("click",openAdd);
+      blank.appendChild(add);
+      $("#song-list").appendChild(blank);
+    } else ranked.forEach((song,index) => $("#song-list").appendChild(renderSong(song,index)));
+    $("#all-count").textContent = String(all.length);
+    $("#stat-songs").textContent = String(all.length).padStart(2,"0");
+    $("#stat-votes").textContent = String(all.reduce((sum,song) => { const v = voteData(song); return sum + v.up + v.down; },0));
+    $("#stat-participants").textContent = String(new Set(all.map((s) => s.author || "Анонимен")).size).padStart(2,"0");
+    $$(".filter-tab").forEach((button) => {
+      const selected = button.dataset.filter === state.filter;
+      button.classList.toggle("is-active",selected);
+      button.setAttribute("aria-pressed", String(selected));
+    });
+    const top = all.slice().sort((a,b) => voteData(b).score - voteData(a).score)[0];
+    if (top) {
+      activeSong = top;
+      $("#featured-image").src = thumb(top);
+      $("#featured-image").alt = "Обложка на " + top.title;
+      $("#featured-title").textContent = top.title;
+      $("#featured-artist").textContent = top.artist;
+      $("#featured-score").textContent = String(voteData(top).score);
+    }
+  }
+  function vote(id,value) {
+    state.votes[id] = state.votes[id] === value ? 0 : value;
+    if (!state.votes[id]) delete state.votes[id];
+    saveState();
+    render();
+    toast(value === 1 ? "Гласът ти е отчетен в този браузър! 👍" : "Гласът ти е отчетен в този браузър! 👎");
+  }
+  function toast(message) {
+    const node = $("#toast");
+    node.textContent = message;
+    node.classList.add("is-visible");
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => node.classList.remove("is-visible"),3200);
+  }
+  function openModal(id) {
+    const modal = $("#" + id);
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden","false");
+    document.body.style.overflow = "hidden";
+    const focusTarget = modal.querySelector("input,button");
+    if (focusTarget) focusTarget.focus();
+  }
+  function closeModal(modal) {
+    if (!modal) return;
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden","true");
+    if (modal.id === "player-modal") $("#youtube-player").src = "about:blank";
+    if (!document.querySelector(".modal.is-open")) document.body.style.overflow = "";
+  }
+  function openAdd() {
+    $("#add-form").reset();
+    $("#song-author").value = state.displayName;
+    $("#form-error").hidden = true;
+    $("#video-preview").hidden = true;
+    openModal("add-modal");
+    $("#youtube-url").focus();
+  }
+  function playSong(song) {
+    $("#player-title").textContent = song.title;
+    $("#player-artist").textContent = song.artist;
+    $("#watch-on-youtube").href = "https://www.youtube.com/watch?v=" + song.youtubeId;
+    $("#youtube-player").src = "https://www.youtube-nocookie.com/embed/" + song.youtubeId + "?autoplay=1&rel=0";
+    openModal("player-modal");
+  }
+  function handleAdd(event) {
+    event.preventDefault();
+    const id = parseYouTubeId($("#youtube-url").value);
+    const title = $("#song-title").value.trim();
+    const artist = $("#song-artist").value.trim();
+    const author = $("#song-author").value.trim() || "Анонимен";
+    const error = $("#form-error");
+    error.hidden = true;
+    if (!id) { error.textContent = "Въведи валиден YouTube адрес."; error.hidden = false; return; }
+    if (!title) { error.textContent = "Добави заглавие на песента."; error.hidden = false; return; }
+    if (songs().some((s) => s.youtubeId === id)) { error.textContent = "Тази песен вече присъства в плейлиста."; error.hidden = false; return; }
+    state.addedSongs.unshift({ id:"local-" + id, youtubeId:id, title:title.slice(0,100), artist:artist.slice(0,70), author:author.slice(0,35), category:$("#song-category").value === "christmas" ? "christmas" : "party", addedAt:new Date().toISOString(), likes:0, dislikes:0 });
+    state.displayName = author === "Анонимен" ? "" : author;
+    state.filter = "all";
+    state.search = "";
+    $("#song-search").value = "";
+    saveState();
+    closeModal($("#add-modal"));
+    render();
+    toast("Песента е добавена в твоето локално демо! 🎵");
+    $("#playlist").scrollIntoView({behavior:"smooth"});
+  }
+  function previewUrl() {
+    const id = parseYouTubeId($("#youtube-url").value);
+    $("#video-preview").hidden = !id;
+    if (id) $("#preview-image").src = "https://i.ytimg.com/vi/" + id + "/mqdefault.jpg";
+  }
+  function exportCsv() {
+    const all = songs().slice().sort((a,b) => voteData(b).score - voteData(a).score);
+    function cell(value) {
+      let str = String(value === undefined || value === null ? "" : value);
+      if (/^[=+\-@]/.test(str)) str = "'" + str;
+      return '"' + str.replace(/"/g,'""') + '"';
+    }
+    const rows = [["Позиция","Заглавие","Изпълнител","Категория","Точки","YouTube URL"]].concat(all.map((s,i) => [i+1,s.title,s.artist,genreLabel(s),voteData(s).score,"https://www.youtube.com/watch?v=" + s.youtubeId]));
+    const blob = new Blob(["\uFEFF" + rows.map((row) => row.map(cell).join(",")).join("\r\n")],{type:"text/csv;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = el("a");
+    a.href = url;
+    a.download = "partybeats-playlist.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url),1000);
+    toast("Експортът е готов! 🎶");
+  }
+  async function share() {
+    try {
+      await navigator.clipboard.writeText(window.location.href.split("#")[0]);
+      toast("Линкът към сайта е копиран!");
+    } catch (_) {
+      window.prompt("Копирай линка към сайта:",window.location.href.split("#")[0]);
+    }
+  }
+  function resetDemo() {
+    if (!window.confirm("Сигурен ли си? Това ще изтрие твоите добавени песни и гласове от този браузър.")) return;
+    state.addedSongs = [];
+    state.votes = {};
+    state.displayName = "";
+    state.filter = "all";
+    state.sort = "popular";
+    state.search = "";
+    $("#song-search").value = "";
+    $("#song-sort").value = "popular";
+    saveState();
+    render();
+    toast("Демото е нулирано.");
+  }
+  function init() {
+    loadState();
+    $$("[data-open-add]").forEach((button) => button.addEventListener("click", openAdd));
+    $("#login-button").addEventListener("click", () => openModal("login-modal"));
+    $("#featured-play").addEventListener("click", () => { if (activeSong) playSong(activeSong); });
+    $("#add-form").addEventListener("submit", handleAdd);
+    $("#youtube-url").addEventListener("input",previewUrl);
+    $("#song-search").addEventListener("input",(e) => { state.search = e.target.value.toLocaleLowerCase("bg-BG").trim(); render(); });
+    $("#song-sort").addEventListener("change",(e) => { state.sort = e.target.value; render(); });
+    $$(".filter-tab").forEach((button) => button.addEventListener("click", () => { state.filter = button.dataset.filter; render(); }));
+    $("#share-button").addEventListener("click",share);
+    $("#export-button").addEventListener("click",exportCsv);
+    $("#reset-button").addEventListener("click",resetDemo);
+    $$(".modal").forEach((modal) => modal.addEventListener("click",(event) => { if (event.target === modal || event.target.closest("[data-close]")) closeModal(modal); }));
+    document.addEventListener("keydown",(event) => { if (event.key === "Escape") $$(".modal.is-open").forEach(closeModal); });
+    render();
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded",init);
+  else init();
+})();

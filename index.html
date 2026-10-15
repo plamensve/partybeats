@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0c1015">
+  <meta name="description" content="PartyBeats — предложи песен, гласувай и създай плейлиста за коледното парти заедно с колегите си.">
+  <title>PartyBeats — Твоят глас. Нашият ритъм.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" class="svg-defs" aria-hidden="true">
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7V5Z" stroke-linejoin="round"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-7-7 7 7-7 7"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+    <symbol id="i-thumbs-up" viewBox="0 0 24 24"><path d="M7 10v11H3V10h4ZM7 10l5-8c2-.3 3 1.1 2.5 3L14 9h6a2 2 0 0 1 2 2.4l-1.7 8a2 2 0 0 1-2 1.6H7"/></symbol>
+    <symbol id="i-thumbs-down" viewBox="0 0 24 24"><path d="M7 14V3H3v11h4Zm0 0 5 8c2 .3 3-1.1 2.5-3L14 15h6a2 2 0 0 0 2-2.4l-1.7-8A2 2 0 0 0 18.3 3H7"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13M9 9l12-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="18" cy="16" rx="3" ry="2"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M13 5h6v6M19 5l-9 9M19 13v6H5V5h6"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.7-4m-6.7 7 6.7 4"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2"/></symbol>
+    <symbol id="i-headphones" viewBox="0 0 24 24"><path d="M3 13v-2a9 9 0 0 1 18 0v2M3 13h4v8H5a2 2 0 0 1-2-2v-6Zm18 0h-4v8h2a2 2 0 0 0 2-2v-6Z"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2Z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 11a9 9 0 0 1 16-5l2 2m0-5v5h-5M21 13a9 9 0 0 1-16 5l-2-2m0 5v-5h5"/></symbol>
+  </svg>
+
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <div class="site-shell" id="top">
+    <header class="header">
+      <a class="brand" href="#top" aria-label="PartyBeats — Начало">
+        <span class="brand-icon" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></span>
+        <span>party<span class="brand-accent">beats</span><span class="brand-period">.</span></span>
+      </a>
+      <nav class="nav-links" aria-label="Главно меню">
+        <a class="nav-link active" href="#top">Начало</a>
+        <a class="nav-link" href="#playlist">Песни</a>
+        <a class="nav-link" href="#how-it-works">Как работи</a>
+      </nav>
+      <div class="header-actions">
+        <span class="demo-tag"><span class="status-dot"></span> ДЕМО ВЕРСИЯ</span>
+        <button class="button button-quiet login-button" id="login-button" type="button">Вход <span class="soon-indicator">скоро</span></button>
+        <button class="button button-primary header-add" data-open-add type="button"><svg class="icon"><use href="#i-plus"></use></svg> Добави песен</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="eyebrow-star">✳</span> ОФИЦИАЛНИЯТ САУНДТРАК НА ПАРТИТО <span class="eyebrow-line"></span> 2026</div>
+          <h1 id="hero-title">Твоят глас.<br><span>Нашият ритъм.</span></h1>
+          <p class="hero-subtitle">Тази Коледа DJ-ят си <strong>ти</strong>. Предложи любимите си парчета, гласувай за хитовете на колегите и нека заедно създадем плейлист, който няма да забравим.</p>
+          <div class="hero-actions">
+            <button class="button button-primary button-large" data-open-add type="button"><svg class="icon"><use href="#i-plus"></use></svg> Предложи песен</button>
+            <a class="button button-outlined button-large" href="#playlist"><svg class="icon"><use href="#i-play"></use></svg> Разгледай песните</a>
+          </div>
+          <div class="hero-bottomline"><span class="avatar-stack" aria-hidden="true"><span>🎅</span><span>🎧</span><span>🎸</span><span>✨</span></span><span>Добави своя музикален вкус към микса!</span></div>
+        </div>
+
+        <div class="hero-visual" aria-hidden="true">
+          <span class="hero-sticker sticker-top">★ CHRISTMAS EDITION</span>
+          <div class="vinyl-glow"></div>
+          <div class="vinyl-record"><div class="record-rings"></div><div class="record-label"><div class="record-mini-logo"><span></span><span></span><span></span></div><span>PARTY<br>BEATS</span><small>SIDE A · 2026</small></div></div>
+          <div class="floating-note note-one">♫</div><div class="floating-note note-two">✦</div>
+          <div class="hero-music-card"><span class="music-card-circle">♫</span><span><strong>GOOD VIBES ONLY</strong><small>YOUR MUSIC. YOUR PARTY.</small></span><div class="mini-equalizer"><i></i><i></i><i></i><i></i></div></div>
+          <div class="visual-play-icon"><svg class="icon"><use href="#i-play"></use></svg></div>
+        </div>
+      </section>
+
+      <div class="quick-stats" aria-label="Статистика на плейлиста">
+        <div class="stat"><span class="stat-icon mint"><svg class="icon"><use href="#i-music"></use></svg></span><span><strong id="stat-songs">0</strong><small>предложени песни</small></span></div>
+        <div class="stat"><span class="stat-icon pink"><svg class="icon"><use href="#i-thumbs-up"></use></svg></span><span><strong id="stat-votes">0</strong><small>демо гласа общо</small></span></div>
+        <div class="stat"><span class="stat-icon yellow"><svg class="icon"><use href="#i-headphones"></use></svg></span><span><strong id="stat-participants">—</strong><small>предложили песен</small></span></div>
+        <div class="stat stat-share"><span class="stat-prompt">Сподели музикалното настроение <span>↗</span></span><button class="button button-light" id="share-button" type="button"><svg class="icon"><use href="#i-share"></use></svg> Сподели сайта</button></div>
+      </div>
+
+      <div class="content-grid" id="playlist">
+        <section class="playlist-section" aria-labelledby="playlist-title">
+          <div class="section-topline"><span class="small-label"><span class="blinking-dot"></span> YOUR PARTY. YOUR PLAYLIST.</span><span class="section-number">01 / THE TRACKLIST</span></div>
+          <div class="section-heading"><div><h2 id="playlist-title">Песните на <em>партито.</em></h2><p>Гласувай за любимите си парчета. Най-харесваните се изкачват нагоре.</p></div><button class="icon-text-button" id="export-button" type="button"><svg class="icon"><use href="#i-download"></use></svg> Експорт CSV</button></div>
+          <div class="toolbar"><div class="filter-tabs" role="group" aria-label="Филтър за песни"><button type="button" class="filter-tab is-active" data-filter="all" aria-pressed="true">Всички <span id="all-count">0</span></button><button type="button" class="filter-tab" data-filter="christmas" aria-pressed="false">🎄 Коледни</button><button type="button" class="filter-tab" data-filter="party" aria-pressed="false">⚡ Парти хитове</button><button type="button" class="filter-tab" data-filter="voted" aria-pressed="false">Моите гласове</button></div><div class="toolbar-bottom"><label class="search-box"><svg class="icon"><use href="#i-search"></use></svg><input id="song-search" type="search" placeholder="Търси песен или изпълнител..." aria-label="Търси песен"></label><label class="sort-box"><span>Подреди:</span><select id="song-sort" aria-label="Подреди песните"><option value="popular">Най-харесвани</option><option value="recent">Най-нови</option><option value="az">По заглавие</option></select></label></div></div>
+
+          <div class="list-heading"><span>ПЕСЕН / ИЗПЪЛНИТЕЛ</span><span>ТВОЯТ ГЛАС</span></div>
+          <div class="song-list" id="song-list" aria-live="polite"></div>
+          <div class="playlist-bottom"><span><svg class="icon"><use href="#i-sparkle"></use></svg> Не виждаш любимото си парче?</span><button class="text-link" data-open-add type="button">Добави го сега <svg class="icon"><use href="#i-arrow"></use></svg></button></div>
+        </section>
+        <aside class="sidebar">
+          <div class="top-pick-label"><span class="small-label">✦ В СВЕТЛИНАТА НА ПРОЖЕКТОРИТЕ</span><span>TOP PICK</span></div>
+          <div class="featured-card"><div class="featured-cover"><img id="featured-image" src="" alt="" loading="lazy"><span class="featured-ribbon">#1 В КЛАСАЦИЯТА</span><button type="button" class="featured-play" id="featured-play" aria-label="Пусни водещата песен"><svg class="icon"><use href="#i-play"></use></svg></button></div><div class="featured-body"><span class="featured-kicker">ПЕСЕНТА НА МОМЕНТА</span><h3 id="featured-title">—</h3><p id="featured-artist">—</p><div class="featured-footer"><span><svg class="icon"><use href="#i-thumbs-up"></use></svg> <strong id="featured-score">0</strong> точки</span><span class="waveform" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div></div></div>
+          <section class="how-card" id="how-it-works"><div class="how-kicker">ТОЛКОВА Е ЛЕСНО</div><h3>Ти избираш.<br><span>Музиката печели.</span></h3><div class="how-step"><span class="step-number">01</span><span><strong>Предложи песен</strong><small>Постави линк от YouTube и добави заглавие.</small></span></div><div class="how-step"><span class="step-number">02</span><span><strong>Дай своя глас</strong><small>Харесваш или не? Натисни 👍 или 👎.</small></span></div><div class="how-step"><span class="step-number">03</span><span><strong>Създаваме плейлиста</strong><small>Хитовете с най-много точки са най-горе.</small></span></div><div class="how-decoration">✳</div></section>
+          <div class="local-note"><span class="note-icon">ⓘ</span><p><strong>Първа версия / демо</strong> Песните и гласовете се съхраняват само в този браузър. Другите колеги все още не виждат промените ти.</p></div>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="footer"><div><a class="footer-brand" href="#top">party<span>beats</span>.</a><p>Made for good music &amp; better parties. <span>✳</span> 2026</p></div><div class="footer-actions"><button class="footer-link" id="reset-button" type="button"><svg class="icon"><use href="#i-refresh"></use></svg> Нулирай демото</button><span class="footer-separator">·</span><a class="footer-link" href="https://github.com/plamensve/partybeats" target="_blank" rel="noopener noreferrer">GitHub <svg class="icon"><use href="#i-external"></use></svg></a></div></footer>
+  </div>
+
+  <div class="modal" id="add-modal" role="dialog" aria-modal="true" aria-labelledby="add-modal-title" aria-hidden="true">
+    <div class="modal-panel add-panel"><div class="modal-head"><div><span class="modal-kicker">YOUR TRACK. YOUR VIBE.</span><h2 id="add-modal-title">Предложи <em>песен.</em></h2><p>Дай шанс на любимия си хит да влезе в плейлиста.</p></div><button type="button" class="modal-close" data-close aria-label="Затвори"><svg class="icon"><use href="#i-close"></use></svg></button></div>
+      <form id="add-form"><label class="field"><span>YouTube линк <b>*</b></span><span class="input-with-icon"><svg class="icon"><use href="#i-link"></use></svg><input id="youtube-url" type="url" placeholder="https://www.youtube.com/watch?v=..." required></span></label><div id="video-preview" class="video-preview" hidden><img id="preview-image" alt="Миниатюра на видеото"><span><strong>Видеото е разпознато!</strong><small>Ще използваме миниатюрата от YouTube.</small></span><svg class="icon"><use href="#i-check"></use></svg></div><label class="field"><span>Име на песента <b>*</b></span><input id="song-title" type="text" maxlength="100" placeholder="Например: Last Christmas" required></label><label class="field"><span>Изпълнител</span><input id="song-artist" type="text" maxlength="70" placeholder="Например: Wham!"></label><div class="form-two"><label class="field"><span>Категория</span><select id="song-category"><option value="party">⚡ Парти хит</option><option value="christmas">🎄 Коледна песен</option></select></label><label class="field"><span>Твоето име (по желание)</span><input id="song-author" type="text" maxlength="35" placeholder="Например: Пламен"></label></div><p class="form-error" id="form-error" role="alert" hidden></p><button class="button button-primary button-submit" type="submit"><svg class="icon"><use href="#i-plus"></use></svg> Добави в плейлиста</button></form>
+    </div>
+  </div>
+
+  <div class="modal" id="player-modal" role="dialog" aria-modal="true" aria-label="YouTube плейър" aria-hidden="true"><div class="modal-panel player-panel"><div class="player-top"><div><span class="modal-kicker">NOW PLAYING</span><h3 id="player-title">—</h3><p id="player-artist">—</p></div><button class="modal-close" data-close type="button" aria-label="Затвори плейъра"><svg class="icon"><use href="#i-close"></use></svg></button></div><div class="video-frame"><iframe id="youtube-player" title="YouTube плейър" src="about:blank" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div><a id="watch-on-youtube" class="player-external" href="#" target="_blank" rel="noopener noreferrer">Гледай в YouTube <svg class="icon"><use href="#i-external"></use></svg></a></div></div>
+
+  <div class="modal" id="login-modal" role="dialog" aria-modal="true" aria-labelledby="login-modal-title" aria-hidden="true"><div class="modal-panel simple-panel"><button class="modal-close simple-close" type="button" data-close aria-label="Затвори"><svg class="icon"><use href="#i-close"></use></svg></button><span class="coming-icon">🎧</span><span class="modal-kicker">COMING SOON</span><h2 id="login-modal-title">Входът идва <em>скоро.</em></h2><p>За тази първа версия не ти трябва регистрация. По-късно ще добавим профили и споделени гласове, за да може всеки колега да участва от своето устройство.</p><button type="button" class="button button-primary" data-close>Супер, разбрах!</button></div></div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
