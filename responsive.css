@@ -1,0 +1,197 @@
+/* PartyBeats v2 responsive finishing layer.
+   This stylesheet loads LAST to resolve legacy breakpoint conflicts.
+   Focus: mobile touch ergonomics, low-height screens, tablet navigation. */
+
+@media(min-width:768px) and (max-width:900px){
+  .header{gap:12px}
+  .header .nav-links{display:flex;gap:12px;min-width:0;margin-left:0}
+  .header .nav-link{font-size:11px}
+  .header .brand{font-size:24px;gap:8px}
+  .header .brand-icon{width:36px;height:36px}
+  .header .header-add{padding:11px 10px;font-size:11px}
+  .content-grid{margin-top:44px}
+  .hero{min-height:400px}
+}
+@media(max-width:767px){
+  html{scroll-padding-top:77px}
+  body{overflow-x:clip}
+  .site-shell{overflow:visible}
+  .ambient{display:none}
+  .hero{padding-top:clamp(22px,5vw,33px);padding-bottom:16px}
+  .hero h1{font-size:clamp(39px,9.5vw,61px);line-height:1.04;letter-spacing:-.05em;margin:15px 0 13px}
+  .hero-subtitle{font-size:13px;line-height:1.65;margin-bottom:17px;max-width:62ch;text-wrap:pretty}
+  .hero-actions>.button{min-height:48px;border-radius:12px;font-size:12px;line-height:1.25;gap:7px}
+  .hero-actions>.button .icon{height:17px;width:17px}
+  .hero-bottomline{margin-top:17px;gap:10px}
+  .avatar-stack span{height:29px;width:29px;font-size:14px}
+  /* KPIs now take one compact line instead of two large rows. */
+  .quick-stats{grid-template-columns:repeat(3,minmax(0,1fr));padding:10px 9px 7px;gap:0;border-radius:14px}
+  .quick-stats>.stat:not(.stat-share){
+    flex-direction:column;align-items:center;justify-content:flex-start;
+    text-align:center;gap:6px;min-height:84px;min-width:0;width:auto;padding:7px 3px 6px
+  }
+  .quick-stats>.stat:nth-child(2),.quick-stats>.stat:nth-child(3){
+    grid-column:auto;border-top:0;border-left:1px solid #34375c
+  }
+  .quick-stats .stat-icon{height:32px;width:32px;border-radius:9px}
+  .quick-stats .stat-icon .icon{height:17px;width:17px}
+  .quick-stats .stat strong{font-size:21px;line-height:1}
+  .quick-stats .stat small{font-size:9.5px;line-height:1.3;max-width:98px;margin-top:4px;text-wrap:balance}
+  .quick-stats .stat-share{grid-column:1/-1;min-height:47px;padding:8px 4px 0;gap:8px}
+  .stat-prompt{font-size:10px}
+  .stat-share .button{min-height:42px;font-size:10px}
+  .content-grid{margin-top:33px;margin-bottom:42px}
+  .section-topline{margin-bottom:10px}
+  .section-number{display:none}
+  .section-heading h2{font-size:clamp(27px,6vw,34px);letter-spacing:-.8px}
+  .section-heading p{font-size:11.5px;line-height:1.55}
+  .section-heading .icon-text-button{
+    font-size:0;flex:none;width:44px;height:44px;padding:0;
+    justify-content:center;border-radius:12px
+  }
+  .section-heading .icon-text-button .icon{width:19px;height:19px}
+  .toolbar{margin-top:17px}
+  .filter-tabs{
+    gap:6px;padding-bottom:9px;scroll-snap-type:x proximity;
+    scroll-padding-inline:16px;
+    mask-image:linear-gradient(to right,#000 0%,#000 93%,transparent 100%)
+  }
+  .filter-tabs:focus-visible{outline:2px solid #baa7ff;outline-offset:-2px}
+  .filter-tab{min-height:44px;padding:9px 13px;border-radius:10px;font-size:11px}
+  .toolbar-bottom{margin:10px 0 12px;gap:9px}
+  .list-heading{display:none}
+  .song-list{gap:9px}
+  /* Keep compact song cards but preserve 44px voting hit targets. */
+  .song-row{
+    grid-template-columns:18px 61px minmax(0,1fr);
+    gap:8px 9px;padding:10px 11px;border-radius:14px;
+    contain:none
+  }
+  .song-rank{font-size:11px}
+  .song-cover{height:61px;width:61px}
+  .song-cover img{height:100%;width:100%;object-fit:cover}
+  .song-info h3{font-size:13.5px;line-height:1.26;margin-bottom:3px;text-wrap:pretty}
+  .song-info .song-artist{font-size:11px;margin-bottom:4px}
+  .song-meta{font-size:10px}
+  .song-meta .song-meta-dot,.song-meta>span:last-child{display:none}
+  .vote-group{gap:8px}
+  .vote-button,.score-box{height:44px;border-radius:10px}
+  .vote-button .icon{height:18px;width:18px}
+  .score-box{font-size:13px}
+  .playlist-bottom{padding:4px 0}
+  .sidebar{margin-top:31px}
+  .featured-cover{height:clamp(190px,51vw,280px)}
+  .featured-body{padding:19px}
+  .featured-body h3{font-size:22px}
+  .how-card{padding:20px}
+  .how-step{margin-block:15px}
+  .how-step strong{font-size:12px}
+  .how-step small,.local-note p{font-size:11px}
+  .footer{padding-bottom:18px}
+  .modal-panel{scroll-padding-bottom:22px;scrollbar-width:thin;padding-bottom:max(20px,env(safe-area-inset-bottom,0px))}
+  .modal-head{align-items:flex-start}
+  .modal-head>div{min-width:0}
+  .modal-head h2{font-size:clamp(26px,7vw,32px)}
+  .field input,.field select{font-size:16px;max-width:100%}
+  .field>span:first-child{line-height:1.5}
+  #add-form{padding-bottom:6px}
+  #add-form .button-submit{min-height:52px}
+  .mobile-nav-link,.mobile-nav-add{min-height:48px}
+  .mobile-nav-link-active{background:#a99cff19;color:#d5c7ff}
+  .mobile-nav-link:focus-visible,.mobile-nav-add:focus-visible{
+    outline:2px solid #a79dff;outline-offset:-2px
+  }
+  .toast{line-height:1.4;padding:12px 15px}
+}
+@media(min-width:390px) and (max-width:767px){
+  .toolbar-bottom{grid-template-columns:minmax(0,1fr) 140px}
+  .toolbar-bottom .sort-box{min-width:0;height:48px;padding:0 10px}
+  .toolbar-bottom .sort-box span{display:none}
+  .toolbar-bottom .sort-box select{width:100%;min-width:0;font-size:13px}
+}
+@media(max-width:389px){
+  .toolbar-bottom .sort-box{height:44px}
+  .toolbar-bottom .sort-box select{font-size:15px}
+}
+@media(max-width:359px){
+  .hero h1{font-size:clamp(35px,11vw,39px)}
+  .hero-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hero-actions>.button{font-size:10.5px;padding:8px 6px;min-height:48px}
+  .hero-actions>.button .icon{width:14px;height:14px}
+  .hero-bottomline{display:none}
+  .quick-stats .stat small{font-size:9px}
+  .quick-stats .stat-share .button{font-size:9px;padding:8px}
+  .song-row{grid-template-columns:16px 54px minmax(0,1fr);gap:7px;padding:9px}
+  .song-cover{width:54px;height:56px}
+  .song-info h3{font-size:12px}
+  .song-info .song-artist{font-size:10px}
+  .vote-group{gap:7px}
+}
+@media(max-width:767px) and (orientation:landscape) and (max-height:520px){
+  .hero{padding-top:16px;padding-bottom:11px}
+  .hero h1{font-size:clamp(30px,6vw,45px)}
+  .hero-subtitle{margin-bottom:12px}
+  .hero-bottomline{display:none}
+}
+@media(hover:none){.song-row:hover{box-shadow:none}}
+@media(prefers-reduced-motion:reduce){
+  .song-row,.button,.featured-cover img{transition:none!important}
+}
+
+/* Unified YouTube player ergonomics + page spacing fallback for :has(). */
+body.has-player:not(.modal-open){overflow-x:clip}
+@media(min-width:768px){
+  body.has-player .site-shell{padding-bottom:120px}
+}
+@media(max-width:767px){
+  body.has-player{padding-bottom:calc(168px + env(safe-area-inset-bottom,0px))}
+  .pb-player{isolation:isolate}
+  .pb-player-frame{max-height:calc(100dvh - 69px - env(safe-area-inset-bottom,0px))}
+  .pb-player-expanded{max-height:calc(100dvh - 190px - env(safe-area-inset-bottom,0px));overscroll-behavior:contain;scroll-padding:14px}
+  .pb-expanded-content{gap:10px}
+  .pb-expanded-info h3{font-size:clamp(17px,5vw,22px);margin:5px 0}
+  .pb-expanded-info>p:not(.pb-player-status){margin-bottom:4px}
+  .pb-waveform{height:24px}
+  .pb-waveform span{transform:scaleY(.47)}
+  .pb-player-bar{padding-top:8px;padding-bottom:7px;gap:8px}
+  .pb-transport{justify-content:center}
+  .pb-skip{min-width:34px}
+  .pb-artwork-toggle,.pb-play-button,.pb-expand-button{touch-action:manipulation}
+  .pb-end-actions .pb-expand-button{width:40px}
+  .pb-player .pb-label,.pb-player-status{line-height:1.45}
+  .pb-player .pb-clock{font-size:10px}
+  #pb-progress{min-height:26px;touch-action:none}
+  .pb-player:not(.is-collapsed) .pb-player-frame{
+    border-color:#7576bb;box-shadow:0 -14px 55px #030419e8
+  }
+}
+@media(max-width:389px){
+  .pb-player-bar{grid-template-columns:42px minmax(0,1fr) 103px 34px;gap:5px;padding-inline:9px}
+  .pb-artwork-toggle{height:42px;width:42px}
+  .pb-transport .pb-icon-button{width:29px}
+  .pb-play-button{height:42px;width:42px}
+  .pb-track-info strong{font-size:12px}
+  .pb-end-actions .pb-expand-button{width:34px}
+}
+@media(max-width:900px) and (orientation:landscape) and (max-height:520px){
+  .pb-player:not([hidden]):not(.is-collapsed){
+    inset:0;padding:0;justify-content:flex-end;z-index:82;
+    background:rgba(7,8,24,.94)
+  }
+  .pb-player:not(.is-collapsed) .pb-player-frame{width:100%;max-height:100dvh;border-radius:0;border:0}
+  .pb-player:not(.is-collapsed) .pb-player-expanded{max-height:calc(100dvh - 104px);padding:12px;overflow-y:auto}
+  .pb-player:not(.is-collapsed) .pb-expanded-content{
+    display:grid;grid-template-columns:minmax(240px,1fr) minmax(155px,.8fr);
+    gap:12px;align-items:start
+  }
+  .pb-player:not(.is-collapsed) .pb-yt-container,
+  .pb-player:not(.is-collapsed) #pb-youtube-host,
+  .pb-player:not(.is-collapsed) .pb-yt-container iframe{min-height:200px}
+  .pb-player:not(.is-collapsed) .pb-waveform{display:none}
+  .pb-player:not(.is-collapsed) .pb-expanded-info h3{font-size:18px}
+  .pb-player:not(.is-collapsed) .pb-player-bar{min-height:85px}
+  body.player-expanded .mobile-nav{visibility:hidden}
+}
+@media(max-width:570px) and (orientation:landscape) and (max-height:520px){
+  .pb-player:not(.is-collapsed) .pb-expanded-content{display:flex;flex-direction:column;align-items:stretch}
+}
