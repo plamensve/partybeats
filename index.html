@@ -11,6 +11,8 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./mobile.css">
+  <link rel="stylesheet" href="./player.css">
+  <script defer src="./player.js"></script>
   <script defer src="./app.js"></script>
 </head>
 <body>
@@ -32,6 +34,10 @@
     <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2Z"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
     <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 11a9 9 0 0 1 16-5l2 2m0-5v5h-5M21 13a9 9 0 0 1-16 5l-2-2m0 5v-5h5"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" stroke-width="3"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="M5 5v14M19 5 8 12l11 7V5Z" stroke-linejoin="round"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M19 5v14M5 5l11 7-11 7V5Z" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
   </svg>
 
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
@@ -123,7 +129,68 @@
     </div>
   </div>
 
-  <div class="modal" id="player-modal" role="dialog" aria-modal="true" aria-label="YouTube плейър" aria-hidden="true"><div class="modal-panel player-panel"><div class="player-top"><div><span class="modal-kicker">NOW PLAYING</span><h3 id="player-title">—</h3><p id="player-artist">—</p></div><button class="modal-close" data-close type="button" aria-label="Затвори плейъра"><svg class="icon"><use href="#i-close"></use></svg></button></div><div class="video-frame"><iframe id="youtube-player" title="YouTube плейър" src="about:blank" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div><a id="watch-on-youtube" class="player-external" href="#" target="_blank" rel="noopener noreferrer">Гледай в YouTube <svg class="icon"><use href="#i-external"></use></svg></a></div></div>
+
+  <!-- SoundCloud-inspired sticky player. The visible YouTube iframe stays unobstructed. -->
+  <section class="pb-player" id="music-player" aria-label="Музикален плейър" hidden>
+    <div class="pb-player-expanded" id="pb-expanded">
+      <div class="pb-expanded-heading">
+        <div class="pb-label"><span class="pb-live-dot"></span> NOW PLAYING <span class="pb-label-divider">/</span> PARTYBEATS RADIO</div>
+        <button class="pb-icon-button pb-collapse" id="pb-collapse" type="button" aria-label="Свий плейъра и паузирай">
+          <svg class="icon"><use href="#i-chevron-down"></use></svg>
+        </button>
+      </div>
+      <div class="pb-expanded-content">
+        <div class="pb-yt-container">
+          <div id="pb-youtube-host"></div>
+        </div>
+        <div class="pb-expanded-info">
+          <span class="pb-section-kicker">🎧 ТВОЯТ ПАРТИ ПЛЕЙЛИСТ</span>
+          <h3 id="pb-expanded-title">—</h3>
+          <p id="pb-expanded-artist">—</p>
+          <div class="pb-waveform" id="pb-waveform" aria-hidden="true"></div>
+          <p class="pb-player-status" id="pb-player-status" role="status" aria-live="polite">Зареждане на YouTube плейъра…</p>
+          <a id="pb-youtube-link" class="pb-youtube-link" href="https://www.youtube.com" target="_blank" rel="noopener noreferrer">
+            Отвори в YouTube <svg class="icon"><use href="#i-external"></use></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="pb-player-bar">
+      <button type="button" id="pb-artwork-toggle" class="pb-artwork-toggle" aria-label="Разгъни плейъра">
+        <img id="pb-artwork" src="" alt="" width="64" height="64">
+      </button>
+      <div class="pb-track-info">
+        <span class="pb-playing-label"><span class="pb-live-dot"></span> СЕГА ЗВУЧИ</span>
+        <strong id="pb-track-title">—</strong>
+        <span id="pb-track-artist">—</span>
+      </div>
+      <div class="pb-transport">
+        <button id="pb-prev" type="button" class="pb-icon-button pb-skip" aria-label="Предишна песен" title="Предишна песен">
+          <svg class="icon"><use href="#i-prev"></use></svg>
+        </button>
+        <button id="pb-play" type="button" class="pb-play-button" aria-label="Пусни" title="Пусни">
+          <svg class="icon" id="pb-play-icon"><use href="#i-play"></use></svg>
+        </button>
+        <button id="pb-next" type="button" class="pb-icon-button pb-skip" aria-label="Следваща песен" title="Следваща песен">
+          <svg class="icon"><use href="#i-next"></use></svg>
+        </button>
+      </div>
+      <div class="pb-timeline">
+        <span id="pb-current" class="pb-clock">0:00</span>
+        <label for="pb-progress" class="pb-sr-only">Позиция в песента</label>
+        <input id="pb-progress" type="range" min="0" max="100" step="0.1" value="0" disabled aria-valuetext="0:00">
+        <span id="pb-duration" class="pb-clock">0:00</span>
+      </div>
+      <div class="pb-end-actions">
+        <button type="button" class="pb-icon-button pb-expand-button" id="pb-expand" aria-expanded="true" aria-controls="pb-expanded" aria-label="Свий плейъра">
+          <svg class="icon" id="pb-expand-icon"><use href="#i-chevron-down"></use></svg>
+        </button>
+        <button type="button" class="pb-icon-button" id="pb-close" aria-label="Затвори плейъра" title="Затвори плейъра">
+          <svg class="icon"><use href="#i-close"></use></svg>
+        </button>
+      </div>
+    </div>
+  </section>
 
   <div class="modal" id="login-modal" role="dialog" aria-modal="true" aria-labelledby="login-modal-title" aria-hidden="true"><div class="modal-panel simple-panel"><button class="modal-close simple-close" type="button" data-close aria-label="Затвори"><svg class="icon"><use href="#i-close"></use></svg></button><span class="coming-icon">🎧</span><span class="modal-kicker">COMING SOON</span><h2 id="login-modal-title">Входът идва <em>скоро.</em></h2><p>За тази първа версия не ти трябва регистрация. По-късно ще добавим профили и споделени гласове, за да може всеки колега да участва от своето устройство.</p><button type="button" class="button button-primary" data-close>Супер, разбрах!</button></div></div>
 

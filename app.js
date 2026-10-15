@@ -188,6 +188,7 @@
     modalTrigger = document.activeElement;
     modal.classList.add("is-open");
     modal.setAttribute("aria-hidden", "false");
+    if (window.PartyBeatsPlayer) window.PartyBeatsPlayer.pauseForModal();
     document.body.classList.add("modal-open");
     document.body.style.overflow = "hidden";
     const focusTarget = modal.querySelector("input,button");
@@ -197,7 +198,7 @@
     if (!modal || !modal.classList.contains("is-open")) return;
     modal.classList.remove("is-open");
     modal.setAttribute("aria-hidden","true");
-    if (modal.id === "player-modal") $("#youtube-player").src = "about:blank";
+
     if (!document.querySelector(".modal.is-open")) {
       document.body.style.overflow = "";
       document.body.classList.remove("modal-open");
@@ -214,11 +215,12 @@
     $("#youtube-url").focus();
   }
   function playSong(song) {
-    $("#player-title").textContent = song.title;
-    $("#player-artist").textContent = song.artist;
-    $("#watch-on-youtube").href = "https://www.youtube.com/watch?v=" + song.youtubeId;
-    $("#youtube-player").src = "https://www.youtube-nocookie.com/embed/" + song.youtubeId + "?autoplay=1&rel=0";
-    openModal("player-modal");
+    if (window.PartyBeatsPlayer) {
+      const queue = sortedSongs();
+      // Featured songs may not belong to the active filter.
+      if (!queue.some((item) => item.id === song.id)) queue.unshift(song);
+      window.PartyBeatsPlayer.play(song, queue);
+    }
   }
   function handleAdd(event) {
     event.preventDefault();
@@ -285,6 +287,7 @@
   }
   function resetDemo() {
     if (!window.confirm("Сигурен ли си? Това ще изтрие твоите добавени песни и гласове от този браузър.")) return;
+    if (window.PartyBeatsPlayer) window.PartyBeatsPlayer.close();
     state.addedSongs = [];
     state.votes = {};
     state.displayName = "";
