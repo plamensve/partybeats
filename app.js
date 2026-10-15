@@ -318,7 +318,7 @@
     const section = $("#playlist");
     if (!section) return;
     const atPlaylist = section.getBoundingClientRect().top <= 128;
-    $(".mobile-nav-link").forEach(link => {
+    $$(".mobile-nav-link").forEach(link => {
       const active = link.dataset.nav === (atPlaylist ? "playlist" : "home");
       link.classList.toggle("mobile-nav-link-active",active);
       if (active) link.setAttribute("aria-current","page");
@@ -350,7 +350,7 @@
       requestAnimationFrame(() => { scrollPending = false; syncMobileNavigation(); });
     },{passive:true});
     window.addEventListener("resize",syncMobileNavigation,{passive:true});
-    $(".mobile-nav-link").forEach(link =>
+    $$(".mobile-nav-link").forEach(link =>
       link.addEventListener("click",() => requestAnimationFrame(syncMobileNavigation))
     );
     $$(".modal").forEach((modal) => modal.addEventListener("click",(event) => { if (event.target === modal || event.target.closest("[data-close]")) closeModal(modal); }));
